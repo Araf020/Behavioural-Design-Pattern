@@ -1,17 +1,11 @@
-package com.arafat.pattern.behavioural.ServerTest;
+package com.arafat.pattern.behavioural.ObserverPattern.client;
 
 
-import com.arafat.pattern.behavioural.ServerTest.Observer;
-import com.arafat.pattern.behavioural.ServerTest.StockEntity;
+import com.arafat.pattern.behavioural.ObserverPattern.StockEntity;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.StringTokenizer;
 
 public class Client extends Observer {
 
@@ -48,12 +42,12 @@ public class Client extends Observer {
 
     @Override
     public void update(StockEntity stk, String msg) {
-        System.out.println("something is changed for ClientID:: " +this.ID);
-        System.out.println("Current Stock State::\n\t"+ stk.toString());
+//        System.out.println("something is changed for ClientID:: " +this.ID);
+//        System.out.println("Current Stock State::\n\t"+ stk.toString());
 
         try {
             System.out.println("writing on input stream");
-            this.dos.writeUTF("**Something has been changed for ClientID:: " +this.ID+"\nInfo:: "+msg+"\nCurrent Stock("+stk.getName()+") State::\n\t"+ stk.toString());
+            this.dos.writeUTF("**SOMETHING HAS BEEN CHANGED FOR CLIENTID:: " +this.ID+"\nINFO:: "+msg+"\nCURRENT STOCK("+stk.getName()+") STATE::\n\t"+ stk.toString().toUpperCase());
 //            System.out.println(this.getDis().readUTF());
 
         }
@@ -106,11 +100,11 @@ public class Client extends Observer {
 //                    e.printStackTrace();
 //                }
 
-                    System.out.println("reading...");
+//                    System.out.println("reading...");
                    String  tosend = br.readLine();
 
 //                String tosend = "lol";
-                System.out.println("tosend: "+ tosend);
+//                System.out.println("tosend: "+ tosend);
 
                 if(tosend.equalsIgnoreCase("Exit"))
                 {
@@ -155,49 +149,49 @@ public class Client extends Observer {
     }
 }
 
-class DisReader implements Runnable{
-
-    DataInputStream dis;
-    DisReader(DataInputStream dis){
-        this.dis = dis;
-    }
-
-    @Override
-    public void run() {
-        System.out.println("reading from dis:");
-        try {
-
-
-            String rcvd = this.dis.readUTF();
-            System.out.println(rcvd);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-}
-
-class DosWriter implements Runnable{
-
-    DataOutputStream dos;
-
-
-    DosWriter(DataOutputStream dos){
-        this.dos = dos;
-
-    }
-
-
-    @Override
-    public void run() {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("writing on dos:");
-        try {
-            String cmd = br.readLine();
-            this.dos.writeUTF(cmd);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-}
+//class DisReader implements Runnable{
+//
+//    DataInputStream dis;
+//    DisReader(DataInputStream dis){
+//        this.dis = dis;
+//    }
+//
+//    @Override
+//    public void run() {
+//        System.out.println("reading from dis:");
+//        try {
+//
+//
+//            String rcvd = this.dis.readUTF();
+//            System.out.println(rcvd);
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
+//    }
+//}
+//
+//class DosWriter implements Runnable{
+//
+//    DataOutputStream dos;
+//
+//
+//    DosWriter(DataOutputStream dos){
+//        this.dos = dos;
+//
+//    }
+//
+//
+//    @Override
+//    public void run() {
+//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//        System.out.println("writing on dos:");
+//        try {
+//            String cmd = br.readLine();
+//            this.dos.writeUTF(cmd);
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
+//    }
+//}

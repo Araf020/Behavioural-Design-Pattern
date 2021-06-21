@@ -1,4 +1,4 @@
-package com.arafat.pattern.behavioural.ServerTest;
+package com.arafat.pattern.behavioural.ObserverPattern;
 
 
 public class StockEntity {

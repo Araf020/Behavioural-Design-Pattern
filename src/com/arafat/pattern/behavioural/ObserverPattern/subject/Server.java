@@ -1,43 +1,33 @@
-package com.arafat.pattern.behavioural.ServerTest;
+package com.arafat.pattern.behavioural.ObserverPattern.subject;
 
 
 
-import com.arafat.pattern.behavioural.ServerTest.Client;
-import com.arafat.pattern.behavioural.ServerTest.Observer;
-import com.arafat.pattern.behavioural.ServerTest.StockEntity;
+import com.arafat.pattern.behavioural.ObserverPattern.StockEntity;
+import com.arafat.pattern.behavioural.ObserverPattern.client.Client;
+import com.arafat.pattern.behavioural.ObserverPattern.client.Observer;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class Server {
 
-    private List<Observer> observerList;
-    private HashMap<StockEntity, ArrayList<Observer>> clientList;
-    private ConcurrentHashMap<StockEntity, ArrayList<Observer>> stockClientMap;
-    private List<StockEntity> stockList;
+
+    private HashMap<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>> clientList;
     private String title;
     private Server MainServer;
-    // private static Server Mainserver;
 
     public Server(String title) {
-        this.observerList = new ArrayList<Observer>();
-        this.stockList = new ArrayList<StockEntity>();
-        this.clientList = new HashMap<StockEntity, ArrayList<Observer>>();
-        this.stockClientMap = new ConcurrentHashMap<StockEntity, ArrayList<Observer>>();
+
+        this.clientList = new HashMap<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>();
         this.title = title;
     }
 
 
 
     public void setState(String stkName,String msg) {
-        for (Observer observer : getObserverListbyStockName(stkName)
+        for (com.arafat.pattern.behavioural.ObserverPattern.client.Observer observer : getObserverListbyStockName(stkName)
         ) {
             this.Notify(observer, stkName,msg);
 
@@ -45,21 +35,21 @@ public class Server {
     }
 
 
-    public HashMap<StockEntity, ArrayList<Observer>> getClientList() {
+    public HashMap<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>> getClientList() {
         return clientList;
     }
 
 
 
-    public void subsCribe(Observer observer, String stockName, DataOutputStream dos) {
+    public void subsCribe(com.arafat.pattern.behavioural.ObserverPattern.client.Observer observer, String stockName, DataOutputStream dos) {
 
         //observerList.add(observer);
 
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
+        Iterator<Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>>
                 iterator = clientList.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
+            Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>
                     entry
                     = iterator.next();
 
@@ -78,17 +68,17 @@ public class Server {
 
     public void unSubscribe(int ID, String stockName) {
 
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
+        Iterator<Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>>
                 iterator = clientList.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
+            Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>
                     entry
                     = iterator.next();
 
             if (stockName.equalsIgnoreCase(entry.getKey().getName())) {
 
-               ArrayList<Observer> observers =  entry.getValue();
+               ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer> observers =  entry.getValue();
 
                /** remove from Hashmap*/
 
@@ -100,9 +90,9 @@ public class Server {
         //this.setState(stockName);
     }
 
-    private  Observer getObserverByID(int ID, ArrayList<Observer> observers){
+    private com.arafat.pattern.behavioural.ObserverPattern.client.Observer getObserverByID(int ID, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer> observers){
 
-        for (Observer obs: observers
+        for (com.arafat.pattern.behavioural.ObserverPattern.client.Observer obs: observers
              ) {
             if (obs.getID() == ID){
                 return obs;
@@ -113,7 +103,7 @@ public class Server {
     }
 
 
-    private void Notify(Observer observer, String stkName, String msg){
+    private void Notify(com.arafat.pattern.behavioural.ObserverPattern.client.Observer observer, String stkName, String msg){
         observer.update(this.getStockEntitybyStockName(stkName),msg);
     }
 
@@ -121,7 +111,8 @@ public class Server {
     public void decreasePrice(String stkName, double decreaseBy) {
 
         this.getStockEntitybyStockName(stkName).decreasePrice(decreaseBy);
-        this.setState(stkName,"Stock Price DecreasedBy: "+ decreaseBy);
+        this.setState(stkName,"STOCK PRICE DECREASEDBY: "+ decreaseBy);
+        System.out.println("Price Decreased!");
 
     }
 
@@ -129,7 +120,8 @@ public class Server {
 
         this.getStockEntitybyStockName(stkName).increasePrice(increaseBy);
 
-        this.setState(stkName,"Stock price IncreasedBy: "+increaseBy);
+        this.setState(stkName,"STOCK PRICE INCREASEDBY: "+increaseBy);
+        System.out.println("Price Increased!");
     }
 
 
@@ -137,7 +129,10 @@ public class Server {
     public void changeCount(String stkName, int count) {
         this.getStockEntitybyStockName(stkName).setCount(count);
 
-        this.setState(stkName,"Count Changed to: "+ count);
+        this.setState(stkName,"COUNT CHANGED TO: "+ count);
+
+        System.out.println("Count Changed!");
+
     }
 
     /***
@@ -146,12 +141,12 @@ public class Server {
      * @return
      */
 
-    public ArrayList<Observer> getObserverListbyStockName(String stkName) {
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
+    public ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer> getObserverListbyStockName(String stkName) {
+        Iterator<Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>>
                 iterator = clientList.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
+            Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>
                     entry
                     = iterator.next();
 
@@ -167,11 +162,11 @@ public class Server {
 
 
     public StockEntity getStockEntitybyStockName(String stkName) {
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
+        Iterator<Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>>
                 iterator = clientList.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
+            Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>
                     entry
                     = iterator.next();
 
@@ -186,7 +181,7 @@ public class Server {
     }
 
     public void addStock(StockEntity stockEntity) {
-        this.clientList.put(stockEntity, new ArrayList<Observer>());
+        this.clientList.put(stockEntity, new ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>());
         System.out.println("\n\tstock added....");
     }
 
@@ -207,28 +202,18 @@ public class Server {
 
     class CommandListener implements Runnable {
 
-        Server server;
 
-        CommandListener(int n) {
 
-        }
+//        CommandListener(int n) {
+//
+//        }
 
-        CommandListener(Server server) {
-            this.server = server;
-        }
+//        CommandListener(Server server) {
+//            this.server = server;
+//        }
 
-        private Server returnServer() {
-            return this.server;
-        }
 
-        public Server getServer() {
-            return server;
-        }
 
-        public CommandListener setServer(Server server) {
-            this.server = server;
-            return this;
-        }
 
         @Override
         public void run() {
@@ -405,23 +390,11 @@ private void startServer(ServerSocket ss, Server srvr) throws IOException{
 
         StringTokenizer command;
         Socket s = null;
-        System.out.println("now?");
+
 
         try {
 
-//                server =  commandListener.getServer();
 
-
-            // socket object to receive incoming client requests
-//                System.out.println("akhn?");
-//                System.out.println("after: ");
-
-//                for ( Map.Entry<StockEntity, ArrayList<Observer>>
-//                        entry: server.getClientList().entrySet()
-//                ) {
-//                    System.out.println(entry.getKey().toString());
-//
-//                }
 
             s = ss.accept();
 
@@ -451,12 +424,12 @@ private void startServer(ServerSocket ss, Server srvr) throws IOException{
 
 private void showList(){
 
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
+        Iterator<Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>>
             iterator = clientList.entrySet().iterator();
 
-    System.out.println("StockName:: ClientID");
+    System.out.println("\n**StockName:: ClientID");
     while (iterator.hasNext()) {
-        Map.Entry<StockEntity, ArrayList<Observer>>
+        Map.Entry<StockEntity, ArrayList<com.arafat.pattern.behavioural.ObserverPattern.client.Observer>>
                 entry
                 = iterator.next();
 
@@ -481,7 +454,8 @@ private void startClientHandlerThread(Socket s, DataInputStream dis, DataOutputS
 
 private void startCommandListener(){
 
-    CommandListener commandListener = new CommandListener(MainServer);
+//    CommandListener commandListener = new CommandListener(MainServer);
+    CommandListener commandListener = new CommandListener();
     Thread commandListenerThread = new Thread(commandListener);
     commandListenerThread.start();
 }
@@ -495,11 +469,28 @@ private void startCommandListener(){
 
 
 
-      server.addStock(new StockEntity("P1", 200.0, 4));
-      server.addStock(new StockEntity("P2", 300.0, 5));
-      server.addStock(new StockEntity("P3", 400.0, 2));
+//      server.addStock(new StockEntity("P1", 200.0, 4));
+//      server.addStock(new StockEntity("P2", 300.0, 5));
+//      server.addStock(new StockEntity("P3", 400.0, 2));
 
 
+      File file = new File("E:\\1705020\\Behavioural-Design-Pattern\\src\\com\\arafat\\pattern\\behavioural\\input.txt");
+      BufferedReader br = new BufferedReader(new FileReader(file));
+
+      String st;
+      while ((st=br.readLine())!=null){
+          StringTokenizer tokenizer = new StringTokenizer(st);
+          if (tokenizer.countTokens()<3){
+              System.out.println("Input File is Ill Formatted!");
+              return;
+          }
+
+          String name = tokenizer.nextToken();
+          int count = Integer.parseInt(tokenizer.nextToken());
+          double price = Double.parseDouble(tokenizer.nextToken());
+
+          server.addStock(new StockEntity(name,price,count));
+      }
       /**
 
        * ###########===============start the server================############
