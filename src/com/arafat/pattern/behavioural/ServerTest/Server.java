@@ -35,13 +35,7 @@ public class Server {
     }
 
 
-    public void setState(String stkName, DataOutputStream dos) {
-        for (Observer observer : getObserverListbyStockName(stkName)
-        ) {
-            this.Notify(observer, stkName);
 
-        }
-    }
     public void setState(String stkName,String msg) {
         for (Observer observer : getObserverListbyStockName(stkName)
         ) {
@@ -55,13 +49,7 @@ public class Server {
         return clientList;
     }
 
-    public void setState(String stkName) {
-        for (Observer observer : getObserverListbyStockName(stkName)
-        ) {
-            this.Notify(observer, stkName);
 
-        }
-    }
 
     public void subsCribe(Observer observer, String stockName, DataOutputStream dos) {
 
@@ -86,26 +74,6 @@ public class Server {
     }
 
 
-    public void subsCribe(int ID, String stockName, DataOutputStream dos) {
-
-        //observerList.add(observer);
-        Observer observer = new Client(ID);
-
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
-                iterator = clientList.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
-                    entry
-                    = iterator.next();
-
-            if (stockName.equalsIgnoreCase(entry.getKey().getName())) {
-
-                entry.getValue().add(observer);
-            }
-        }
-        // Notify(observer, stockName);
-    }
 
 
     public void unSubscribe(int ID, String stockName) {
@@ -144,37 +112,16 @@ public class Server {
         return null;
     }
 
-    public void unSubscribe(Observer observer, String stockName, DataOutputStream dos) {
 
-        Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
-                iterator = clientList.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<StockEntity, ArrayList<Observer>>
-                    entry
-                    = iterator.next();
-
-            if (stockName.equalsIgnoreCase(entry.getKey().getName())) {
-
-                entry.getValue().remove(observer);
-            }
-        }
-        //this.setState(stockName);
-    }
-
-
-    private void Notify(Observer observer, String stkName) {
-
-//        observer.update(this.getStockEntitybyStockName(stkName));
-    }
     private void Notify(Observer observer, String stkName, String msg){
         observer.update(this.getStockEntitybyStockName(stkName),msg);
     }
 
+
     public void decreasePrice(String stkName, double decreaseBy) {
 
         this.getStockEntitybyStockName(stkName).decreasePrice(decreaseBy);
-        this.setState(stkName);
+        this.setState(stkName,"Stock Price DecreasedBy: "+ decreaseBy);
 
     }
 
@@ -186,10 +133,11 @@ public class Server {
     }
 
 
-    public void changeCount(String stkName, int count, DataOutputStream dos) {
+
+    public void changeCount(String stkName, int count) {
         this.getStockEntitybyStockName(stkName).setCount(count);
 
-        this.setState(stkName, dos);
+        this.setState(stkName,"Count Changed to: "+ count);
     }
 
     /***
@@ -287,43 +235,46 @@ public class Server {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 try {
-                    System.out.println("i am running");
+
                     String command = br.readLine();
                     System.out.println(command);
+
+                    if (command.equalsIgnoreCase("show")){
+                        MainServer.showList();
+                        continue;
+                    }
+
                     StringTokenizer stringTokenizer = new StringTokenizer(command);
                     String type = stringTokenizer.nextToken();
                     String stkName = stringTokenizer.nextToken();
-                    Double value = Double.parseDouble(stringTokenizer.nextToken());
+                    String value = stringTokenizer.nextToken();
 
-
-                    this.server.addStock(new StockEntity("P5", 567.0, 3));
-
+//                    this.server.addStock(new StockEntity("P5", 567.0, 3));
 
                     if (type.equalsIgnoreCase("I")) {
-                        server.increasePrice(stkName, value);
+                        MainServer.increasePrice(stkName, Double.parseDouble(value));
 
-                    } else {
+                    }
+                    else if (type.equalsIgnoreCase("D")){
+                        MainServer.decreasePrice(stkName,Double.parseDouble(value));
+                    }
+                    else if (type.equalsIgnoreCase("C")){
+                        MainServer.changeCount(stkName,Integer.parseInt(value));
+                    }
+
+
+                    else {
                         System.out.println("Invalid input");
                     }
 
-//                if(command.equals("listClients")) {
-//
-//                    // Assuming you will have static list of customer. In which you will
-//                    // add a customer/client when a new client get connected and remove
-//                    // when a client get disconnected
-//
-//                    System.out.println("Total Connected customer :" + customers.size());
-//                    System.out.println("Details :");
-//                    for(Customer cust : customers) {
-//                        System.out.println(cust.getName());
-//                    }
-//                }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
+
+
 
 
     class ClientHandler extends Thread {
@@ -446,10 +397,11 @@ private void startServer(ServerSocket ss, Server srvr) throws IOException{
 
         MainServer.startCommandListener();
     while (true) {
-        System.out.println("\n\tI: Increase a stock price. Example: I P1 10.00\n" +
-                "\tD: Decrease a stock price. Example: D P4 5.00\n" +
-                "\tC: Change in stock count (always positive). Example: C P2 2\n" +
-                "Subscribers will be notified if the state of their subscribed stocks has changed.\n\n");
+        System.out.println("\n\t>>I: Increase a stock price. Example: I P1 10.00\n" +
+                "\t>>D: Decrease a stock price. Example: D P4 5.00\n" +
+                "\t>>C: Change in stock count (always positive). Example: C P2 2\n" +
+                "\t\n>>Type 'show' to see stocks and corresponding subscribers\n" +
+                "**Subscribers will be notified if the state of their subscribed stocks has changed.\n\n");
 
         StringTokenizer command;
         Socket s = null;
@@ -502,12 +454,22 @@ private void showList(){
         Iterator<Map.Entry<StockEntity, ArrayList<Observer>>>
             iterator = clientList.entrySet().iterator();
 
+    System.out.println("StockName:: ClientID");
     while (iterator.hasNext()) {
         Map.Entry<StockEntity, ArrayList<Observer>>
                 entry
                 = iterator.next();
 
-        System.out.println(entry.getKey().getName()+ ": "+ entry.getValue().toString());
+
+        System.out.print(entry.getKey().getName()+ ":: ");
+        for (Observer obs: entry.getValue()
+             ) {
+
+
+            System.out.print(obs.getID());
+            System.out.print(", ");
+        }
+        System.out.println();
 
     }
 
@@ -530,76 +492,21 @@ private void startCommandListener(){
 
       ServerSocket ss = new ServerSocket(5056);
       Server server = new Server("myServer");
-     // Mainserver = new Server("MAinServer");
+
+
 
       server.addStock(new StockEntity("P1", 200.0, 4));
       server.addStock(new StockEntity("P2", 300.0, 5));
       server.addStock(new StockEntity("P3", 400.0, 2));
 
 
+      /**
+
+       * ###########===============start the server================############
+       */
+
       server.startServer(ss,server);
-
-//      Mainserver.addStock(new StockEntity("P1", 200.0, 4));
-//      Mainserver.addStock(new StockEntity("P2", 300.0, 5));
-//      Mainserver.addStock(new StockEntity("P3", 400.0, 2));
-
-
-
-
-//      while (true) {
-//          System.out.println("\n\tI: Increase a stock price. Example: I P1 10.00\n" +
-//                  "\tD: Decrease a stock price. Example: D P4 5.00\n" +
-//                  "\tC: Change in stock count (always positive). Example: C P2 2\n" +
-//                  "Subscribers will be notified if the state of their subscribed stocks has changed.\n\n");
-//
-//          StringTokenizer command;
-//          Socket s = null;
-//          System.out.println("now?");
-//
-//          try {
-//
-////                server =  commandListener.getServer();
-//
-//
-//              // socket object to receive incoming client requests
-////                System.out.println("akhn?");
-////                System.out.println("after: ");
-//
-////                for ( Map.Entry<StockEntity, ArrayList<Observer>>
-////                        entry: server.getClientList().entrySet()
-////                ) {
-////                    System.out.println(entry.getKey().toString());
-////
-////                }
-//
-//              s = ss.accept();
-//
-////                System.out.println("kokhn?");
-//              System.out.println("A new client is connected : " + s);
-//
-//              // obtaining input and out streams
-//              DataInputStream dis = new DataInputStream(s.getInputStream());
-//              DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-//
-//              server.startClientHandlerThread(s,dis,dos);
-//
-//
-//              // create a new thread object
-////              Thread t = new Server.ClientHandler(s, dis, dos, server);
-////
-////              // Invoking the start() method
-////              t.start();
-//
-//          } catch (Exception e) {
-//              s.close();
-//              e.printStackTrace();
-//          }
-//
-//      }
 
   }
 
-//    class ServerInstance {
-//        public volatile Server MainServer = new Server("Mainserver");
-//    }
 }

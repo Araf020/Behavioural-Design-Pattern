@@ -17,41 +17,22 @@ public class Client extends Observer {
 
     private String name;
     private int ID;
-    private Socket givenSocket;
+//    private Socket givenSocket;
     private DataOutputStream dos;
     private DataInputStream dis;
-    private List<StockEntity> stockList;
+//    private List<StockEntity> stockList;
 
-//    private static DataInputStream dis;
+    //    private static DataInputStream dis;
 //    static DataOutputStream dos;
     public Client(String name) {
         this.name = name;
-        stockList = new ArrayList<StockEntity>();
-    }
-    public Client(int id){
-        this.ID = id;
+
     }
 
-    public Client(int ID,Socket s){
-        this.givenSocket = s;
-        this.ID = ID;
-    }
 
     public Client(int ID,DataOutputStream dos){
         this.dos = dos;
         this.ID = ID;
-    }
-    public  DataOutputStream getDataOs(){
-        return this.dos;
-    }
-
-    public Socket getGivenSocket() {
-        return givenSocket;
-    }
-
-    public Client setGivenSocket(Socket givenSocket) {
-        this.givenSocket = givenSocket;
-        return this;
     }
 
     public int getID() {
@@ -63,12 +44,7 @@ public class Client extends Observer {
         return this;
     }
 
-    private  DataInputStream getDis() throws IOException{
-        return new DataInputStream(this.givenSocket.getInputStream());
-    }
-    private  DataOutputStream getDos() throws IOException{
-        return new DataOutputStream(this.givenSocket.getOutputStream());
-    }
+
 
     @Override
     public void update(StockEntity stk, String msg) {
@@ -77,7 +53,7 @@ public class Client extends Observer {
 
         try {
             System.out.println("writing on input stream");
-            this.dos.writeUTF("something is changed for ClientID:: " +this.ID+"\nInfo:: "+msg+"\nCurrent Stock State::\n\t"+ stk.toString());
+            this.dos.writeUTF("**Something has been changed for ClientID:: " +this.ID+"\nInfo:: "+msg+"\nCurrent Stock("+stk.getName()+") State::\n\t"+ stk.toString());
 //            System.out.println(this.getDis().readUTF());
 
         }
@@ -108,28 +84,35 @@ public class Client extends Observer {
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
+            System.out.println(dis.readUTF());
+
+//            Thread t = new Thread(new DosWriter(dos));
+//            t.start();
+
             // the following loop performs the exchange of
             // information between client and client handler
             while (true)
             {
-                System.out.println("\n\t>>S: Subscribe. Example S P1\n\t>>U: Unsubscribe. Example U P1\n"+
-                        "\t>>Type Exit to terminate connection.");
-                try {
+                System.out.println("\n\t>>S: Subscribe. Example S P1\n\t>>U: Unsubscribe. Example U P1\n"+ "\tType 'M' to see your Inbox!\n "+
+                        "\t>>Type 'EXIT' to terminate connection.");
+//                try {
+//
+//                    System.out.println("i am here\n");
+//                    Thread thread = new Thread(new DisReader(dis));
+//                    thread.start();
+//
+//                }
+//                catch (Exception e){
+//                    e.printStackTrace();
+//                }
 
-                    System.out.println("i am here\n");
-                    Thread thread = new Thread(new DisReader(dis));
-                    thread.start();
+                    System.out.println("reading...");
+                   String  tosend = br.readLine();
 
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-
-                System.out.println("reading...");
-                String tosend = br.readLine();
+//                String tosend = "lol";
                 System.out.println("tosend: "+ tosend);
 
-                if(tosend.equals("Exit"))
+                if(tosend.equalsIgnoreCase("Exit"))
                 {
                     System.out.println("Closing this connection : " + s);
                     s.close();
@@ -137,19 +120,29 @@ public class Client extends Observer {
                     break;
                 }
 
+                else if (tosend.equalsIgnoreCase("M")){
+                    if (dis.available()!=0){
+                        System.out.println(dis.readUTF());
+                    }
+                    else {
+                        System.out.println("No updates now!");
+                    }
+
+                }
+
 //                Thread t2 = new Thread(new DosWriter(dos,tosend));
 //                t2.start();
-                dos.writeUTF(tosend);
+                else {
+                    dos.writeUTF(tosend);
 
-                // If client sends exit,close this connection
-                // and then break from the while loop
 
 
 //                Thread thread1 = new Thread(new DisReader(dis));
 //                thread1.start();
 
-                String received = dis.readUTF();
-                System.out.println(received);
+                    String received = dis.readUTF();
+                    System.out.println(received);
+                }
             }
 
             // closing resources
@@ -160,76 +153,6 @@ public class Client extends Observer {
             e.printStackTrace();
         }
     }
-//    class CommandListener implements Runnable {
-//
-//        Server server;
-//
-//        CommandListener(int n) {
-//
-//        }
-//
-//        CommandListener(Server server) {
-//            this.server = server;
-//        }
-//
-//        private Server returnServer() {
-//            return this.server;
-//        }
-//
-//        public Server getServer() {
-//            return server;
-//        }
-//
-//        public Server.CommandListener setServer(Server server) {
-//            this.server = server;
-//            return this;
-//        }
-//
-//        @Override
-//        public void run() {
-//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//            while (true) {
-//                try {
-//                    System.out.println("i am running");
-//                    String command = br.readLine();
-//                    System.out.println(command);
-//                    StringTokenizer stringTokenizer = new StringTokenizer(command);
-//                    String type = stringTokenizer.nextToken();
-//                    String stkName = stringTokenizer.nextToken();
-//                    Double value = Double.parseDouble(stringTokenizer.nextToken());
-//
-//
-//                    this.server.addStock(new StockEntity("P5", 567.0, 3));
-//
-//
-//                    if (type.equalsIgnoreCase("I")) {
-//                        server.increasePrice(stkName, value);
-//                    } else {
-//                        System.out.println("Invalid input");
-//                    }
-//
-////                if(command.equals("listClients")) {
-////
-////                    // Assuming you will have static list of customer. In which you will
-////                    // add a customer/client when a new client get connected and remove
-////                    // when a client get disconnected
-////
-////                    System.out.println("Total Connected customer :" + customers.size());
-////                    System.out.println("Details :");
-////                    for(Customer cust : customers) {
-////                        System.out.println(cust.getName());
-////                    }
-////                }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-
-
-
-
 }
 
 class DisReader implements Runnable{
@@ -257,19 +180,21 @@ class DisReader implements Runnable{
 class DosWriter implements Runnable{
 
     DataOutputStream dos;
-    String cmd;
 
-    DosWriter(DataOutputStream dos, String cmd){
+
+    DosWriter(DataOutputStream dos){
         this.dos = dos;
-        this.cmd = cmd;
+
     }
+
 
     @Override
     public void run() {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("writing on dos:");
         try {
-
-            dos.writeUTF(cmd);
+            String cmd = br.readLine();
+            this.dos.writeUTF(cmd);
         }
         catch (Exception e){
             e.printStackTrace();
