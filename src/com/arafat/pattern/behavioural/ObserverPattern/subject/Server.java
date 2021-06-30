@@ -474,7 +474,7 @@ private void startCommandListener(){
 //      server.addStock(new StockEntity("P3", 400.0, 2));
 
 
-      File file = new File("E:\\1705020\\Behavioural-Design-Pattern\\src\\com\\arafat\\pattern\\behavioural\\input.txt");
+      File file = new File("/home/arafat/Documents/1705020/Behavioural-Design-Pattern/src/com/arafat/pattern/behavioural/input.txt");
       BufferedReader br = new BufferedReader(new FileReader(file));
 
       String st;
